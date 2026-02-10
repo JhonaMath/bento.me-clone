@@ -159,7 +159,7 @@ function EmbedBlock({ url }: { url: string }) {
     if (twitchMatch) {
       return (
         <iframe
-          src={`https://player.twitch.tv/?channel=${twitchMatch[1]}&parent=${window.location.hostname}`}
+          src={`https://player.twitch.tv/?channel=${twitchMatch[1]}&parent=${typeof window !== 'undefined' ? window.location.hostname : ''}`}
           height="315"
           width="100%"
           frameBorder="0"
