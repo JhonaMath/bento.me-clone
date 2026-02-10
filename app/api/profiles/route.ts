@@ -1,31 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireUser } from '@/lib/auth-helpers'
 import { prisma } from '@/lib/prisma'
+import { TenantRole } from '@prisma/client'
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const userId = (session.user as any).id
+    const user = await requireUser()
     const { tenantId, handle, displayName } = await req.json()
 
-    // Verify user owns the tenant
-    const tenant = await prisma.tenant.findFirst({
+    // Verify user has access to the tenant
+    const membership = await prisma.membership.findFirst({
       where: {
-        id: tenantId,
-        ownerId: userId,
+        userId: user.id,
+        tenantId,
+        role: {
+          in: [TenantRole.OWNER, TenantRole.ADMIN, TenantRole.EDITOR],
+        },
       },
     })
 
-    if (!tenant) {
+    if (!membership) {
       return NextResponse.json(
-        { error: 'Tenant not found' },
-        { status: 404 }
+        { error: 'Access denied: Insufficient permissions' },
+        { status: 403 }
+      )
+    }
+
+    // Validate handle format
+    if (!/^[a-z0-9-]+$/.test(handle)) {
+      return NextResponse.json(
+        { error: 'Handle can only contain lowercase letters, numbers, and hyphens' },
+        { status: 400 }
       )
     }
 
@@ -51,11 +56,11 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(profile, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Profile creation error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: error.message || 'Internal server error' },
+      { status: error.message?.includes('Unauthorized') ? 401 : 500 }
     )
   }
 }

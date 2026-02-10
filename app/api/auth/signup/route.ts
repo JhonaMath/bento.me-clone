@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
+import { TenantRole } from '@prisma/client'
+
+// Function to generate slug from tenant name
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, 50)
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,28 +36,58 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Generate unique slug
+    let slug = generateSlug(tenantName)
+    let slugExists = await prisma.tenant.findUnique({ where: { slug } })
+    let counter = 1
+    
+    while (slugExists) {
+      slug = `${generateSlug(tenantName)}-${counter}`
+      slugExists = await prisma.tenant.findUnique({ where: { slug } })
+      counter++
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Create user and tenant
-    const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        password: hashedPassword,
-        tenants: {
-          create: {
-            name: tenantName,
-          },
+    // Create user, tenant, and membership in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create user
+      const user = await tx.user.create({
+        data: {
+          email,
+          name,
+          password: hashedPassword,
         },
-      },
-      include: {
-        tenants: true,
-      },
+      })
+
+      // Create tenant
+      const tenant = await tx.tenant.create({
+        data: {
+          name: tenantName,
+          slug,
+          ownerId: user.id,
+        },
+      })
+
+      // Create membership with OWNER role
+      await tx.membership.create({
+        data: {
+          userId: user.id,
+          tenantId: tenant.id,
+          role: TenantRole.OWNER,
+        },
+      })
+
+      return { user, tenant }
     })
 
     return NextResponse.json(
-      { message: 'User created successfully', userId: user.id },
+      { 
+        message: 'User created successfully', 
+        userId: result.user.id,
+        tenantSlug: result.tenant.slug,
+      },
       { status: 201 }
     )
   } catch (error) {
