@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum BlockType {
+  LINK
+  SOCIAL
+  EMBED
+  LIST
+  TEXT
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          Role      @default(USER)
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  tenants       Tenant[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  owner     User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  profiles  Profile[]
+}
+
+model Profile {
+  id          String    @id @default(cuid())
+  handle      String    @unique
+  displayName String?
+  bio         String?
+  avatarUrl   String?
+  tenantId    String
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sections    Section[]
+  clicks      Click[]
+}
+
+model Section {
+  id        String   @id @default(cuid())
+  title     String?
+  order     Int
+  profileId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  blocks    Block[]
+}
+
+model Block {
+  id        String    @id @default(cuid())
+  type      BlockType
+  title     String?
+  content   String    @db.Text
+  url       String?
+  order     Int
+  sectionId String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  section   Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  clicks    Click[]
+}
+
+model Click {
+  id        String   @id @default(cuid())
+  blockId   String
+  profileId String
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  
+  block     Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
