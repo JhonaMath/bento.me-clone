@@ -40,11 +40,19 @@ export async function POST(req: NextRequest) {
     let slug = generateSlug(tenantName)
     let slugExists = await prisma.tenant.findUnique({ where: { slug } })
     let counter = 1
+    const maxAttempts = 100
     
-    while (slugExists) {
+    while (slugExists && counter < maxAttempts) {
       slug = `${generateSlug(tenantName)}-${counter}`
       slugExists = await prisma.tenant.findUnique({ where: { slug } })
       counter++
+    }
+    
+    if (slugExists) {
+      return NextResponse.json(
+        { error: 'Unable to generate unique slug. Please try a different workspace name.' },
+        { status: 400 }
+      )
     }
 
     // Hash password

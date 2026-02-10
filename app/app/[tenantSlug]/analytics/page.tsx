@@ -139,21 +139,27 @@ export default async function AnalyticsPage({
                 <p className="text-gray-500 text-center py-4">No click data yet</p>
               ) : (
                 <div className="space-y-4">
-                  {topProfiles.map((item, index) => (
-                    <div key={item.profile?.id || index} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-gray-500 w-6">#{index + 1}</span>
-                        <div>
-                          <p className="font-medium">{item.profile?.displayName || item.profile?.handle}</p>
-                          <p className="text-sm text-gray-500">/{item.profile?.handle}</p>
+                  {topProfiles.map((item) => {
+                    if (!item.profile?.id) return null; // Skip items with missing profile data
+                    
+                    return (
+                      <div key={item.profile.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-gray-500 w-6">
+                            #{topProfiles.indexOf(item) + 1}
+                          </span>
+                          <div>
+                            <p className="font-medium">{item.profile.displayName || item.profile.handle}</p>
+                            <p className="text-sm text-gray-500">/{item.profile.handle}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-semibold">{item.clicks.toLocaleString()}</p>
+                          <p className="text-sm text-gray-500">clicks</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-lg font-semibold">{item.clicks.toLocaleString()}</p>
-                        <p className="text-sm text-gray-500">clicks</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

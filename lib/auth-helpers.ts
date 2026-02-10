@@ -3,6 +3,14 @@ import { authOptions } from './auth';
 import { prisma } from './prisma';
 import { TenantRole } from '@prisma/client';
 
+// Role hierarchy for authorization checks
+const ROLE_HIERARCHY: Record<TenantRole, number> = {
+  [TenantRole.OWNER]: 4,
+  [TenantRole.ADMIN]: 3,
+  [TenantRole.EDITOR]: 2,
+  [TenantRole.VIEWER]: 1,
+};
+
 /**
  * Get the current authenticated user or throw an error
  */
@@ -58,15 +66,8 @@ export async function requireTenantMembership(
     throw new Error('Access denied: You are not a member of this workspace');
   }
 
-  // Check role hierarchy: OWNER > ADMIN > EDITOR > VIEWER
-  const roleHierarchy: Record<TenantRole, number> = {
-    [TenantRole.OWNER]: 4,
-    [TenantRole.ADMIN]: 3,
-    [TenantRole.EDITOR]: 2,
-    [TenantRole.VIEWER]: 1,
-  };
-
-  if (roleHierarchy[membership.role] < roleHierarchy[minRole]) {
+  // Check role hierarchy
+  if (ROLE_HIERARCHY[membership.role] < ROLE_HIERARCHY[minRole]) {
     throw new Error(`Access denied: Requires ${minRole} role or higher`);
   }
 
@@ -107,14 +108,7 @@ export async function requireProfileAccess(profileId: string, minRole: TenantRol
   }
 
   // Check role hierarchy
-  const roleHierarchy: Record<TenantRole, number> = {
-    [TenantRole.OWNER]: 4,
-    [TenantRole.ADMIN]: 3,
-    [TenantRole.EDITOR]: 2,
-    [TenantRole.VIEWER]: 1,
-  };
-
-  if (roleHierarchy[membership.role] < roleHierarchy[minRole]) {
+  if (ROLE_HIERARCHY[membership.role] < ROLE_HIERARCHY[minRole]) {
     throw new Error(`Access denied: Requires ${minRole} role or higher`);
   }
 
