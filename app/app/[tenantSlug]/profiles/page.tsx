@@ -3,16 +3,18 @@ import { requireTenantMembership } from '@/lib/auth-helpers'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { TenantRole } from '@prisma/client'
-import CreateProfileButton from '@/components/CreateProfileButton'
+import { CreateProfileButton } from '@/components/CreateProfileButton'
 
 export default async function ProfilesPage({
   params,
 }: {
-  params: { tenantSlug: string }
+  params: Promise<{ tenantSlug: string }>
 }) {
+  const { tenantSlug } = await params
+  
   try {
     const { tenant, membership } = await requireTenantMembership(
-      params.tenantSlug,
+      tenantSlug,
       TenantRole.EDITOR
     )
 

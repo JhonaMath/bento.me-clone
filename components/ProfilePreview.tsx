@@ -20,6 +20,8 @@ type Profile = {
   id: string
   handle: string
   displayName: string | null
+  tagline1: string | null
+  tagline2: string | null
   bio: string | null
   avatarUrl: string | null
   published: boolean
@@ -93,8 +95,14 @@ export function ProfilePreview({ profile }: { profile: Profile }) {
         <h1 className="text-3xl font-bold text-gray-900">
           {profile.displayName || profile.handle}
         </h1>
+        {profile.tagline1 && (
+          <p className="text-gray-700 mt-2">{profile.tagline1}</p>
+        )}
+        {profile.tagline2 && (
+          <p className="text-gray-700">{profile.tagline2}</p>
+        )}
         {profile.bio && (
-          <p className="text-gray-600 mt-2">{profile.bio}</p>
+          <p className="text-gray-600 mt-3">{profile.bio}</p>
         )}
       </div>
 

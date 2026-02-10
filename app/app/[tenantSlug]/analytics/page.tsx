@@ -6,10 +6,12 @@ import Link from 'next/link'
 export default async function AnalyticsPage({
   params,
 }: {
-  params: { tenantSlug: string }
+  params: Promise<{ tenantSlug: string }>
 }) {
+  const { tenantSlug } = await params
+  
   try {
-    const { tenant, membership } = await requireTenantMembership(params.tenantSlug)
+    const { tenant, membership } = await requireTenantMembership(tenantSlug)
 
     // Get date ranges
     const now = new Date()

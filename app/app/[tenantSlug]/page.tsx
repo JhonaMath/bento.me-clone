@@ -7,10 +7,12 @@ import { TenantRole } from '@prisma/client'
 export default async function TenantOverview({
   params,
 }: {
-  params: { tenantSlug: string }
+  params: Promise<{ tenantSlug: string }>
 }) {
+  const { tenantSlug } = await params
+  
   try {
-    const { tenant, membership } = await requireTenantMembership(params.tenantSlug)
+    const { tenant, membership } = await requireTenantMembership(tenantSlug)
 
     const profiles = await prisma.profile.findMany({
       where: { tenantId: tenant.id },
@@ -25,7 +27,7 @@ export default async function TenantOverview({
       orderBy: { createdAt: 'desc' },
     })
 
-    const canEdit = [TenantRole.OWNER, TenantRole.ADMIN, TenantRole.EDITOR].includes(membership.role)
+    const canEdit = ([TenantRole.OWNER, TenantRole.ADMIN, TenantRole.EDITOR] as string[]).includes(membership.role)
 
     return (
       <div className="min-h-screen bg-gray-50">
