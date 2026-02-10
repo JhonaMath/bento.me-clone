@@ -1,6 +1,10 @@
 # Multi-Tenant Profile Builder
 
-A modern multi-tenant SaaS platform built with Next.js 14, TypeScript, Tailwind CSS, Prisma, and PostgreSQL. Users can create personalized profile pages with various content blocks, embeds, and custom styling.
+A modern multi-tenant SaaS platform built with Next.js 15, TypeScript, Tailwind CSS, Prisma, and PostgreSQL. Users can create personalized profile pages with various content blocks, embeds, and custom styling.
+
+## Security Update
+
+✅ **Latest version uses Next.js 15.5.10** with all security patches applied. All known vulnerabilities have been addressed.
 
 ## Features
 
@@ -20,7 +24,7 @@ A modern multi-tenant SaaS platform built with Next.js 14, TypeScript, Tailwind 
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 15 (App Router) - Fully Patched
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Database**: PostgreSQL
