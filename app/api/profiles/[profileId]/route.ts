@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { profileId: string } }
+  segmentData: { params: Promise<{ profileId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,6 +14,7 @@ export async function PATCH(
     }
 
     const updates = await req.json()
+    const params = await segmentData.params
 
     const profile = await prisma.profile.update({
       where: { id: params.profileId },

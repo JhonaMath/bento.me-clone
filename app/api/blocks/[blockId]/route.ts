@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { blockId: string } }
+  segmentData: { params: Promise<{ blockId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,6 +14,7 @@ export async function PATCH(
     }
 
     const updates = await req.json()
+    const params = await segmentData.params
 
     const block = await prisma.block.update({
       where: { id: params.blockId },
@@ -32,13 +33,15 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { blockId: string } }
+  segmentData: { params: Promise<{ blockId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const params = await segmentData.params
 
     await prisma.block.delete({
       where: { id: params.blockId },

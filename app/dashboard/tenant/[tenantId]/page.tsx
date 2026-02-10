@@ -8,7 +8,7 @@ import { CreateProfileButton } from '@/components/CreateProfileButton'
 export default async function TenantPage({
   params,
 }: {
-  params: { tenantId: string }
+  params: Promise<{ tenantId: string }>
 }) {
   const session = await getServerSession(authOptions)
 
@@ -17,10 +17,11 @@ export default async function TenantPage({
   }
 
   const userId = (session.user as any).id
+  const { tenantId } = await params
 
   const tenant = await prisma.tenant.findFirst({
     where: {
-      id: params.tenantId,
+      id: tenantId,
       ownerId: userId,
     },
     include: {

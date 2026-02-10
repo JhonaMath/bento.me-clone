@@ -4,9 +4,10 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { handle: string; blockId: string } }
+  segmentData: { params: Promise<{ handle: string; blockId: string }> }
 ) {
   try {
+    const params = await segmentData.params
     const { handle, blockId } = params
 
     // Find the profile and block

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { sectionId: string } }
+  segmentData: { params: Promise<{ sectionId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,6 +14,7 @@ export async function PATCH(
     }
 
     const { title } = await req.json()
+    const params = await segmentData.params
 
     const section = await prisma.section.update({
       where: { id: params.sectionId },
@@ -32,13 +33,15 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { sectionId: string } }
+  segmentData: { params: Promise<{ sectionId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const params = await segmentData.params
 
     await prisma.section.delete({
       where: { id: params.sectionId },

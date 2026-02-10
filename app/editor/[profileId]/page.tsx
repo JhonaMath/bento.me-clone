@@ -7,7 +7,7 @@ import { ProfileEditor } from '@/components/ProfileEditor'
 export default async function EditorPage({
   params,
 }: {
-  params: { profileId: string }
+  params: Promise<{ profileId: string }>
 }) {
   const session = await getServerSession(authOptions)
 
@@ -16,10 +16,11 @@ export default async function EditorPage({
   }
 
   const userId = (session.user as any).id
+  const { profileId } = await params
 
   const profile = await prisma.profile.findFirst({
     where: {
-      id: params.profileId,
+      id: profileId,
       tenant: {
         ownerId: userId,
       },

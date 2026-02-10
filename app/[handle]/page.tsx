@@ -6,10 +6,11 @@ import { ProfileView } from '@/components/ProfileView'
 export async function generateMetadata({
   params,
 }: {
-  params: { handle: string }
+  params: Promise<{ handle: string }>
 }): Promise<Metadata> {
+  const { handle } = await params
   const profile = await prisma.profile.findUnique({
-    where: { handle: params.handle },
+    where: { handle },
   })
 
   if (!profile || !profile.published) {
@@ -38,10 +39,11 @@ export async function generateMetadata({
 export default async function ProfilePage({
   params,
 }: {
-  params: { handle: string }
+  params: Promise<{ handle: string }>
 }) {
+  const { handle } = await params
   const profile = await prisma.profile.findUnique({
-    where: { handle: params.handle },
+    where: { handle },
     include: {
       sections: {
         include: {
