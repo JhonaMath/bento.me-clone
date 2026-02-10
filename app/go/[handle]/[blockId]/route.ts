@@ -13,6 +13,7 @@ export async function GET(
     // Find the profile and block
     const profile = await prisma.profile.findUnique({
       where: { handle },
+      select: { id: true, tenantId: true },
     })
 
     if (!profile) {
@@ -35,18 +36,22 @@ export async function GET(
     // Track the click
     const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
     const userAgent = req.headers.get('user-agent') || 'unknown'
+    const referrer = req.headers.get('referer') || req.headers.get('referrer') || null
+    const targetUrl = block.url || block.content
 
     await prisma.click.create({
       data: {
-        blockId: block.id,
+        tenantId: profile.tenantId,
         profileId: profile.id,
+        blockId: block.id,
+        url: targetUrl,
+        referrer,
         ipAddress,
         userAgent,
       },
     })
 
     // Redirect to the URL
-    const targetUrl = block.url || block.content
     if (targetUrl) {
       redirect(targetUrl)
     }

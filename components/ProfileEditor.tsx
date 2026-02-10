@@ -26,6 +26,8 @@ type Profile = {
   id: string
   handle: string
   displayName: string | null
+  tagline1: string | null
+  tagline2: string | null
   bio: string | null
   avatarUrl: string | null
   published: boolean
@@ -150,6 +152,51 @@ export function ProfileEditor({ profile: initialProfile }: { profile: Profile })
                   disabled
                   className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100"
                   value={profile.handle}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tagline 1
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., 👨‍💻 Full-Stack Developer"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={profile.tagline1 || ''}
+                  onChange={(e) =>
+                    setProfile({ ...profile, tagline1: e.target.value })
+                  }
+                  onBlur={(e) => updateProfile({ tagline1: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tagline 2
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., 🎮 Game Developer & Content Creator"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={profile.tagline2 || ''}
+                  onChange={(e) =>
+                    setProfile({ ...profile, tagline2: e.target.value })
+                  }
+                  onBlur={(e) => updateProfile({ tagline2: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Avatar URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://example.com/avatar.jpg"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={profile.avatarUrl || ''}
+                  onChange={(e) =>
+                    setProfile({ ...profile, avatarUrl: e.target.value })
+                  }
+                  onBlur={(e) => updateProfile({ avatarUrl: e.target.value })}
                 />
               </div>
               <div>

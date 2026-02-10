@@ -1,187 +1,378 @@
-# Multi-Tenant Profile Builder
+# Multi-Tenant SaaS Profile Builder (Bento.me Clone)
 
-A modern multi-tenant SaaS platform built with Next.js 15, TypeScript, Tailwind CSS, Prisma, and PostgreSQL. Users can create personalized profile pages with various content blocks, embeds, and custom styling.
+A modern, production-ready multi-tenant SaaS platform built with Next.js 15, TypeScript, Tailwind CSS, Prisma, and PostgreSQL. Create customizable profile pages (link-in-bio style) with team collaboration, role-based access control, and comprehensive analytics.
 
-## Security Update
+## 🎯 Features
 
-✅ **Latest version uses Next.js 15.5.10** with all security patches applied. All known vulnerabilities have been addressed.
+### Core Platform Features
+- 🔐 **Authentication & Authorization**: Secure authentication with NextAuth.js, bcrypt password hashing, and JWT sessions
+- 🏢 **True Multi-Tenancy**: Workspace-based organization with role-based access control (OWNER, ADMIN, EDITOR, VIEWER)
+- 👥 **Team Collaboration**: Invite team members with different permission levels
+- 🌐 **Public Profile Pages**: Clean, SEO-friendly URLs at `/{handle}`
 
-## Features
+### Profile Management
+- ✏️ **Visual Editor**: Split-screen editor with live preview
+- 📦 **Rich Content Blocks**:
+  - **Link Blocks**: Call-to-action buttons with custom text
+  - **Social Links**: Compact social media buttons
+  - **Text Blocks**: Rich text content with formatting
+  - **List Blocks**: Bullet-point lists for features, skills, etc.
+  - **Embed Blocks**: YouTube, Spotify, and Twitch embeds
+- 🎨 **Customization**: Taglines, avatar, bio, and theme support
+- 📱 **Responsive Design**: Mobile-first, works on all devices
 
-- 🔐 **Authentication & Authorization**: Secure user authentication with NextAuth.js and role-based access control
-- 🏢 **Multi-tenancy**: Users can create workspaces (tenants) and manage multiple profiles
-- 👤 **Custom Profiles**: Public profile pages accessible via unique handles (e.g., `/johnsmith`)
-- ✏️ **Visual Editor**: Drag-and-drop editor with live preview for building profile pages
-- 📦 **Block Types**: 
-  - Link blocks with click tracking
-  - Social media links
-  - Text content
-  - Lists
-  - Rich embeds (YouTube, Spotify, Twitch)
-- 📊 **Analytics**: Click tracking system for all link blocks via `/go/[handle]/[blockId]`
-- 🎨 **Dynamic SEO**: Automatic meta tags and Open Graph support for profile pages
-- 🐳 **Docker Support**: Complete Docker setup with docker-compose for easy deployment
+### Analytics & Tracking
+- 📊 **Click Tracking**: Automatic tracking via `/go/{handle}/{blockId}` redirects
+- 📈 **Analytics Dashboard**: View clicks by profile, date ranges (7/30 days)
+- 🔍 **Detailed Reports**: Recent clicks, top profiles, referrer tracking
 
-## Tech Stack
+### Developer Experience
+- 🚀 **Next.js 15 App Router**: Latest React Server Components
+- 🎯 **TypeScript**: Full type safety
+- 💾 **Prisma ORM**: Type-safe database access
+- 🐳 **Docker Ready**: Complete Docker and Docker Compose setup
+- 📝 **Comprehensive Seed Data**: Demo account with sample profiles
 
-- **Framework**: Next.js 15 (App Router) - Fully Patched
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Database**: PostgreSQL
-- **ORM**: Prisma
-- **Authentication**: NextAuth.js
-- **Deployment**: Docker & Docker Compose
+## 🛠️ Tech Stack
 
-## Getting Started
+- **Framework**: Next.js 15.5.10 (App Router) with React 19
+- **Language**: TypeScript 5.9+
+- **Styling**: Tailwind CSS 3.4
+- **Database**: PostgreSQL 14+
+- **ORM**: Prisma 5.22
+- **Authentication**: NextAuth.js 4.24 with bcrypt
+- **Deployment**: Docker, Vercel, Render, Fly.io compatible
 
-### Prerequisites
+## 📋 Prerequisites
 
 - Node.js 18+ 
-- PostgreSQL database
+- PostgreSQL 14+ database
 - npm or yarn
 
-### Local Development
+## 🚀 Quick Start
 
-1. Clone the repository:
+### 1. Clone the repository
+
 ```bash
 git clone https://github.com/JhonaMath/bento.me-clone.git
 cd bento.me-clone
 ```
 
-2. Install dependencies:
+### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
+### 3. Set up environment variables
+
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your database credentials and secrets:
+Edit `.env` with your configuration:
+
 ```env
+# Database
 DATABASE_URL="postgresql://user:password@localhost:5432/bentoclone?schema=public"
+
+# NextAuth
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key-change-this-in-production"
+NEXTAUTH_SECRET="your-secret-key-minimum-32-characters-long"
 ```
 
-4. Run database migrations:
+Generate a secure NEXTAUTH_SECRET:
 ```bash
-npx prisma migrate dev
+openssl rand -base64 32
 ```
 
-5. Start the development server:
+### 4. Initialize the database
+
+```bash
+# Create migration (first time only)
+npx prisma migrate dev --name init
+
+# Generate Prisma Client
+npx prisma generate
+
+# Seed demo data (optional but recommended)
+npm run db:seed
+```
+
+### 5. Start the development server
+
 ```bash
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to see your application.
+Visit [http://localhost:3000](http://localhost:3000)
 
-### Docker Deployment
+### 6. Try the demo account
 
-Run the entire stack with Docker Compose:
+After seeding, log in with:
+- **Email**: `demo@example.com`
+- **Password**: `demo123`
+- **Profile**: `/jhonamath`
+
+## 🐳 Docker Deployment
+
+### Using Docker Compose (Easiest)
 
 ```bash
+# Start PostgreSQL + Next.js app
 docker-compose up -d
+
+# View logs
+docker-compose logs -f app
+
+# Stop
+docker-compose down
 ```
 
-This will start:
-- PostgreSQL database on port 5432
-- Next.js application on port 3000
+The app will be available at http://localhost:3000
 
-## Project Structure
+### Manual Docker Build
 
-```
-├── app/                      # Next.js 14 App Router
-│   ├── api/                  # API routes
-│   ├── auth/                 # Authentication pages
-│   ├── dashboard/            # User dashboard
-│   ├── editor/              # Profile editor
-│   ├── go/                   # Click tracking redirects
-│   └── [handle]/            # Public profile pages
-├── components/               # React components
-├── lib/                      # Utility functions
-├── prisma/                   # Database schema and migrations
-├── public/                   # Static assets
-├── Dockerfile               # Docker configuration
-└── docker-compose.yml       # Docker Compose setup
+```bash
+# Build image
+docker build -t bento-clone .
+
+# Run with existing PostgreSQL
+docker run -p 3000:3000 \
+  -e DATABASE_URL="postgresql://user:password@host:5432/db" \
+  -e NEXTAUTH_URL="http://localhost:3000" \
+  -e NEXTAUTH_SECRET="your-secret" \
+  bento-clone
 ```
 
-## Usage
+## 📁 Project Structure
 
-### Creating an Account
+```
+├── app/                          # Next.js 15 App Router
+│   ├── api/                      # API routes
+│   │   ├── auth/                 # Authentication endpoints
+│   │   ├── profiles/             # Profile CRUD
+│   │   ├── sections/             # Section CRUD
+│   │   └── blocks/               # Block CRUD
+│   ├── app/[tenantSlug]/         # Tenant-scoped routes
+│   │   ├── page.tsx              # Workspace overview
+│   │   ├── profiles/             # Profile management
+│   │   └── analytics/            # Analytics dashboard
+│   ├── auth/                     # Auth pages (signin/signup)
+│   ├── dashboard/                # Main dashboard
+│   ├── editor/[profileId]/       # Profile editor
+│   ├── go/[handle]/[blockId]/    # Click tracking redirects
+│   └── [handle]/                 # Public profile pages
+├── components/                   # React components
+│   ├── ProfileEditor.tsx         # Split-screen editor
+│   ├── ProfileView.tsx           # Public profile view
+│   ├── ProfilePreview.tsx        # Editor preview panel
+│   ├── BlockEditor.tsx           # Block management
+│   └── CreateProfileButton.tsx   # Profile creation modal
+├── lib/                          # Utilities
+│   ├── auth.ts                   # NextAuth configuration
+│   ├── auth-helpers.ts           # Authorization helpers
+│   └── prisma.ts                 # Prisma client
+├── prisma/                       # Database
+│   ├── schema.prisma             # Database schema
+│   ├── seed.ts                   # Seed script
+│   └── migrations/               # Migration history
+├── Dockerfile                    # Docker configuration
+└── docker-compose.yml            # Compose setup
+```
 
-1. Visit `/auth/signup`
-2. Enter your details and workspace name
-3. Sign in at `/auth/signin`
+## 🔑 Key Routes
 
-### Creating a Profile
+### Public Routes
+- `/` - Landing page
+- `/{handle}` - Public profile (e.g., `/jhonamath`)
+- `/auth/signin` - Sign in page
+- `/auth/signup` - Sign up page
 
-1. From your dashboard, select a workspace
-2. Click "Create Profile"
-3. Choose a unique handle (username)
-4. Add a display name
+### Protected Routes
+- `/dashboard` - User dashboard (lists workspaces)
+- `/app/{tenantSlug}` - Workspace overview
+- `/app/{tenantSlug}/profiles` - Manage profiles
+- `/app/{tenantSlug}/analytics` - Analytics dashboard
+- `/editor/{profileId}` - Profile editor
 
-### Building Your Profile
-
-1. Click "Edit" on any profile
-2. Add sections to organize your content
-3. Add blocks within sections:
-   - **Link**: Create clickable buttons with URLs
-   - **Social**: Add social media links
-   - **Text**: Add formatted text content
-   - **List**: Create bullet-point lists
-   - **Embed**: Embed YouTube videos, Spotify tracks, or Twitch streams
-4. See changes in real-time in the live preview
-5. Click "Publish" to make your profile public
-
-### Viewing Your Profile
-
-Your profile will be accessible at `/{your-handle}`
-
-### Analytics
-
-Track clicks on your links via the dashboard. All link clicks are recorded with:
-- Timestamp
-- IP address
-- User agent
-
-## API Endpoints
-
-- `POST /api/auth/signup` - Create new user account
-- `POST /api/profiles` - Create new profile
-- `PATCH /api/profiles/[profileId]` - Update profile
+### API Endpoints
+- `POST /api/auth/signup` - Create account
+- `POST /api/profiles` - Create profile
+- `PATCH /api/profiles/{id}` - Update profile
 - `POST /api/sections` - Create section
-- `PATCH /api/sections/[sectionId]` - Update section
-- `DELETE /api/sections/[sectionId]` - Delete section
+- `PATCH /api/sections/{id}` - Update section
+- `DELETE /api/sections/{id}` - Delete section
 - `POST /api/blocks` - Create block
-- `PATCH /api/blocks/[blockId]` - Update block
-- `DELETE /api/blocks/[blockId]` - Delete block
-- `GET /go/[handle]/[blockId]` - Click tracking redirect
+- `PATCH /api/blocks/{id}` - Update block
+- `DELETE /api/blocks/{id}` - Delete block
+- `GET /go/{handle}/{blockId}` - Click tracking redirect
 
-## Database Schema
+## 💾 Database Schema
 
-The application uses the following main models:
+### Core Models
 
-- **User**: User accounts with authentication
-- **Tenant**: Workspaces owned by users
-- **Profile**: Public profiles with unique handles
-- **Section**: Organizational sections within profiles
-- **Block**: Content blocks (links, text, embeds, etc.)
-- **Click**: Click tracking data
+**User** - User accounts
+- `id`, `email`, `password`, `name`, `role`
 
-## Security Features
+**Tenant** - Workspaces
+- `id`, `name`, `slug` (unique), `ownerId`
 
-- Password hashing with bcrypt
-- JWT-based session management
-- Role-based access control (USER, ADMIN)
-- Protected API routes
-- SQL injection prevention via Prisma
+**Membership** - User-Tenant relationships
+- `id`, `userId`, `tenantId`, `role` (OWNER/ADMIN/EDITOR/VIEWER)
 
-## License
+**Profile** - Public profiles
+- `id`, `handle` (unique), `displayName`, `tagline1`, `tagline2`, `bio`, `avatarUrl`, `themeJson`, `published`
+
+**Section** - Content sections
+- `id`, `profileId`, `title`, `order`
+
+**Block** - Content blocks
+- `id`, `sectionId`, `type`, `title`, `content`, `url`, `order`
+
+**Click** - Analytics
+- `id`, `tenantId`, `profileId`, `blockId`, `url`, `referrer`, `ipAddress`, `userAgent`, `createdAt`
+
+**Invite** - Team invitations
+- `id`, `tenantId`, `email`, `role`, `token`, `expiresAt`
+
+**LinkPreviewCache** - OG metadata cache
+- `id`, `url`, `title`, `description`, `image`, `favicon`
+
+## 🔒 Security Features
+
+- ✅ Password hashing with bcrypt (10 rounds)
+- ✅ JWT-based session management
+- ✅ HTTP-only secure cookies
+- ✅ CSRF protection
+- ✅ SQL injection prevention (Prisma parameterized queries)
+- ✅ XSS prevention (React auto-escaping)
+- ✅ Role-based access control (RBAC)
+- ✅ Tenant isolation via authorization helpers
+- ✅ Server-side authentication checks
+- ✅ Environment variable secrets
+
+## 👥 User Roles & Permissions
+
+### Tenant Roles
+
+| Role | Create/Edit Profiles | Delete Profiles | View Analytics | Invite Members | Manage Settings |
+|------|---------------------|-----------------|----------------|----------------|-----------------|
+| **OWNER** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **ADMIN** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **EDITOR** | ✅ | ❌ | ✅ | ❌ | ❌ |
+| **VIEWER** | ❌ | ❌ | ✅ | ❌ | ❌ |
+
+## 🎨 Customization
+
+### Profile Themes
+
+Profiles support custom themes via the `themeJson` field:
+
+```json
+{
+  "primaryColor": "#3b82f6",
+  "backgroundColor": "#ffffff",
+  "textColor": "#1f2937"
+}
+```
+
+Theme rendering can be extended in `ProfileView.tsx` and `ProfilePreview.tsx`.
+
+## 📊 Analytics
+
+The platform tracks:
+- Total clicks (all time, 7 days, 30 days)
+- Clicks by profile
+- Recent click activity
+- Referrer information
+- User agent data
+- IP addresses (anonymized)
+
+Access analytics at `/app/{tenantSlug}/analytics`
+
+## 🧪 Development
+
+### Available Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run db:seed      # Seed database with demo data
+```
+
+### Database Commands
+
+```bash
+npx prisma studio              # Open Prisma Studio GUI
+npx prisma migrate dev         # Create and apply migration
+npx prisma migrate deploy      # Apply migrations (production)
+npx prisma generate            # Generate Prisma Client
+npx prisma db push             # Push schema without migration
+npx prisma db seed             # Run seed script
+```
+
+## 🚢 Production Deployment
+
+### Vercel (Recommended)
+
+1. Push code to GitHub
+2. Import project in Vercel
+3. Add environment variables
+4. Deploy
+
+### Render
+
+1. Create new Web Service
+2. Connect repository
+3. Set build command: `npm run build`
+4. Set start command: `npm start`
+5. Add environment variables
+6. Deploy
+
+### Fly.io
+
+```bash
+fly launch
+fly secrets set DATABASE_URL="..." NEXTAUTH_SECRET="..." NEXTAUTH_URL="..."
+fly deploy
+```
+
+## 🔧 Environment Variables Reference
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/db` |
+| `NEXTAUTH_URL` | Public URL of your app | `https://yourdomain.com` |
+| `NEXTAUTH_SECRET` | Secret for JWT encryption | Generate with `openssl rand -base64 32` |
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run `npm run build` to ensure it compiles
+5. Submit a pull request
+
+## 📝 License
 
 ISC
 
-## Contributing
+## 🙏 Acknowledgments
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+- Inspired by Bento.me (no branding or assets copied)
+- Built with Next.js, Prisma, and the React ecosystem
+- Authentication powered by NextAuth.js
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/JhonaMath/bento.me-clone/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/JhonaMath/bento.me-clone/discussions)
+
+---
+
+**Note**: This is an educational project and not affiliated with Bento.me. All code is original and no branding/assets were copied.

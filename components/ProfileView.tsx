@@ -20,6 +20,8 @@ type Profile = {
   id: string
   handle: string
   displayName: string | null
+  tagline1: string | null
+  tagline2: string | null
   bio: string | null
   avatarUrl: string | null
   sections: Section[]
@@ -92,8 +94,14 @@ export function ProfileView({ profile }: { profile: Profile }) {
         <h1 className="text-4xl font-bold text-gray-900 mb-2">
           {profile.displayName || profile.handle}
         </h1>
+        {profile.tagline1 && (
+          <p className="text-gray-700 text-lg mb-1">{profile.tagline1}</p>
+        )}
+        {profile.tagline2 && (
+          <p className="text-gray-700 text-lg mb-3">{profile.tagline2}</p>
+        )}
         {profile.bio && (
-          <p className="text-gray-600 text-lg">{profile.bio}</p>
+          <p className="text-gray-600 mt-4">{profile.bio}</p>
         )}
       </div>
 

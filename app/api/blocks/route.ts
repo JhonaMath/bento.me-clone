@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireProfileAccess } from '@/lib/auth-helpers'
 import { prisma } from '@/lib/prisma'
+import { TenantRole } from '@prisma/client'
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { sectionId, type, order } = await req.json()
+
+    // Get section to verify profile access
+    const section = await prisma.section.findUnique({
+      where: { id: sectionId },
+      select: { profileId: true },
+    })
+
+    if (!section) {
+      return NextResponse.json({ error: 'Section not found' }, { status: 404 })
     }
 
-    const { sectionId, type, order } = await req.json()
+    // Verify user has edit access to this profile
+    await requireProfileAccess(section.profileId, TenantRole.EDITOR)
 
     const block = await prisma.block.create({
       data: {
@@ -22,11 +30,11 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(block, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Block creation error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: error.message || 'Internal server error' },
+      { status: error.message?.includes('Unauthorized') || error.message?.includes('Access denied') ? 403 : 500 }
     )
   }
 }

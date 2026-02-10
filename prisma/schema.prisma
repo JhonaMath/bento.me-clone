@@ -15,6 +15,13 @@ enum Role {
   ADMIN
 }
 
+enum TenantRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
 enum BlockType {
   LINK
   SOCIAL
@@ -35,6 +42,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   
   tenants       Tenant[]
+  memberships   Membership[]
   accounts      Account[]
   sessions      Session[]
 }
@@ -75,22 +83,29 @@ model VerificationToken {
 }
 
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  ownerId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   
-  owner     User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  profiles  Profile[]
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  profiles    Profile[]
+  memberships Membership[]
+  invites     Invite[]
+  clicks      Click[]
 }
 
 model Profile {
   id          String    @id @default(cuid())
   handle      String    @unique
   displayName String?
+  tagline1    String?
+  tagline2    String?
   bio         String?
   avatarUrl   String?
+  themeJson   String?   @db.Text
   tenantId    String
   published   Boolean   @default(false)
   createdAt   DateTime  @default(now())
@@ -130,12 +145,53 @@ model Block {
 
 model Click {
   id        String   @id @default(cuid())
-  blockId   String
+  tenantId  String
   profileId String
+  blockId   String?
+  url       String
+  referrer  String?
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
   
-  block     Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  block     Block?   @relation(fields: [blockId], references: [id], onDelete: SetNull)
+}
+
+model Membership {
+  id        String     @id @default(cuid())
+  userId    String
+  tenantId  String
+  role      TenantRole @default(VIEWER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, tenantId])
+}
+
+model Invite {
+  id         String     @id @default(cuid())
+  tenantId   String
+  email      String
+  role       TenantRole @default(VIEWER)
+  token      String     @unique
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime   @default(now())
+  
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model LinkPreviewCache {
+  id          String    @id @default(cuid())
+  url         String    @unique
+  title       String?
+  description String?
+  image       String?
+  favicon     String?
+  updatedAt   DateTime  @updatedAt
 }
